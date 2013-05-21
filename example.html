@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Google Analytics Test</title>
+		<meta name="ga-tracking-id" content="UA-12345678-1" />
+		<meta name="ga-domain" content="www.domain.com" />
+		<script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
+		<script type="text/javascript" src="googleanalytics.js"></script>
+		<script type="text/javascript">
+			$(document).ready
+			(
+				function()
+				{
+					// set a listener on any link with a class of track
+					$(".track").click
+					(
+						function(event)
+						{
+							// and send the track event to analytics with params category, action, value
+							googleAnalytics.trackEvent("linkEvent", "clicked", $(this).attr("id"));
+						}
+					);
+				}
+			);
+		</script>
+	</head>
+	<body>
+		Testing Google Analytics.<br />
+		<a href="javascript:void(0);" class="track" id="link1">Test tracking</a>.
+	</body>
+</html>
