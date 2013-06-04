@@ -36,8 +36,6 @@
 		{
 			// create self reference for scope
 			var self = this;
-			// init empty container object for our tracking
-			//this.analytics;
 			// initialize
 			this.init(this.getMeta("ga-tracking-id"), this.getMeta("ga-domain"));
 			// do we want to auto send the pageview?
@@ -53,18 +51,18 @@
 			// insert script and setup google's object
 			init: function(trackingId, trackingDomain)
 			{
-				//window['GoogleAnalyticsObject'] = "ga";
-				this.analytics = this.analytics || function()
+				window["GoogleAnalyticsObject"] = "ga";
+				window["ga"] = window["ga"] || function()
 				{
-					(this.analytics.q = this.analytics.q || []).push(arguments);
+					(window["ga"].q = window["ga"].q || []).push(arguments);
 				},
-				this.analytics.l = new Date();
+				window["ga"].l = 1 * new Date();
 				gaScript = document.createElement("script"),
 				scriptBlock = document.getElementsByTagName("script")[0];
 				gaScript.async = 1;
 				gaScript.src = "//www.google-analytics.com/analytics.js";
 				scriptBlock.parentNode.insertBefore(gaScript, scriptBlock);
-				this.analytics("create", trackingId, trackingDomain);
+				window["ga"]("create", trackingId, trackingDomain);
 			},
 
 			// function to read data from meta tag
@@ -103,18 +101,18 @@
 				{
 					if(options)
 					{
-						this.analytics(action, cat, options);
+						window["ga"](action, cat, options);
 					}
 					else
 					{
-						this.analytics(action, cat);
+						window["ga"](action, cat);
 					}
 				}
 				else
 				{
 					if(options)
 					{
-						this.analytics(action, options);
+						window["ga"](action, options);
 					}
 					else
 					{
