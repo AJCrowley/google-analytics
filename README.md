@@ -1,6 +1,11 @@
-Google Analytics
+GoogleAnalytics.js
 ================
 
+This is a helper object that allows you to define your GA parameters in the meta tags.
+At it's most basic, it automates the implementation of google analytics, but also
+allows for more advanced options to be passed and tracked.
+
+Basic usage:
 Include script in your HTML with
 ```html
 <meta name="ga-domain" content="yourdomain.com" />
@@ -9,15 +14,31 @@ Include script in your HTML with
 ```
 Where the ga-domain is your domain, and ga-tracking-id meta tag is your Google Analytics ID.
 
-The rest is handled automatically!
-
-You can handle tracking with the following syntax:
+Create instance with:
 ```js
-googleAnalytics.trackEvent("eventCategory", "eventAction", "eventDetail");
+/*
+	Params:
+		autoSentPageView - boolean: send pageview to analytics automatically
+*/
+var googleAnalytics = new GoogleAnalytics(true);
 ```
 
-When the object is instance (usually contained within the main googleanalytics.js file, there are two optional params, both boolean:
+Advanced usage:
 ```js
-var googleAnalytics = new GoogleAnalytics([inpage link ID required], [debug mode]);
+/*
+Params:
+	action - string: "create" for initial instancing, "send" for additional requests, except custom dimensions and metrics, then "set"
+	category - string: category of action
+	options - object: additional options, docs at https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference
+*/
+googleAnalytics.track
+(
+	"send",
+	"social",
+	{
+		"socialNetwork": "facebook",
+		"socialAction": "like",
+		"socialTarget": "http://www.facebook.com"
+	}
+);
 ```
-Both default to false. Sometimes Google requires the inpage link ID. If this is the case, the first parameter should be true. Debug mode just outputs useful info into the console if true.

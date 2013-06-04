@@ -1,96 +1,127 @@
-// _gaq array for Google Analytics params
-var _gaq = _gaq || [];
+/*
+	GoogleAnalytics.js by Kris McCann, 2013
 
-// create self instantiating GA object
-var GoogleAnalytics = function(inpageReq, debug)
-{
-	// if inpageReq param not passed, assume false
-	inpageReq = inpageReq || false;
-	// if debug param not passed, assume false
-	debug = debug || false;
-	// store self reference
-	var self = this;
+	This is a helper object that allows you to define your GA parameters in the meta tags.
+	At it's most basic, it automates the implementation of google analytics, but also
+	allows for more advanced options to be passed and tracked.
 
-	// function to read data from meta tag
-	this.getMeta = function(attr)
-	{
-		// get all meta tags
-		var metaTags = document.getElementsByTagName("meta");
-		// store result
-		var result;
-		// loop through all tags
-		for(var i = 0; i < metaTags.length; i++)
-		{
-			// is this the one we seek?
-			if (metaTags[i].name.search(attr) != -1)
-			{
-				// yep, store result and exit loop
-				result = metaTags[i].content;
-				break;
-			}
-		}
-		// did we find it?
-		if(!result)
-		{
-			// no, throw an error
-			throw("Meta tag " + attr + " not found.");
-		}
-		// send back result
-		return result;
-	};
+	Basic usage:
+	var googleAnalytics = new GoogleAnalytics(true);
 
-	this.trackEvent = function(category, action, value)
-	{
-		_gaq.push(["_trackEvent", category, action, value,, false]);
-	};
+	Params:
+		autoSentPageView - boolean: send pageview to analytics automatically
 
-	// setup defaults, including data from meta tags
-	if(inpageReq)
-	{
-		var pluginUrl = "//www.google-analytics.com/plugins/ga/inpage_linkid.js";
-		_gaq.push(["_require", "inpage_linkid", pluginUrl]);
-	}
-	try
-	{
-		_gaq.push(["_setAccount", this.getMeta("ga-tracking-id")]);
-	}
-	catch(err)
-	{
-		if(debug)
-		{
-			console.debug("FATAL: No tracking ID");
-		}
-		return;
-	}
-	try
-	{
-		_gaq.push(["_setDomainName", this.getMeta("ga-domain")]);
-	}
-	catch(err)
-	{
-		if(debug)
-		{
-			console.debug("No domain set");
-		}
-	}
-	_gaq.push(["_trackPageview"]);
-	// self executing function to embed script from google
+	Advanced usage:
+	googleAnalytics.track
 	(
-		function()
+		"send",
+		"social",
 		{
-			// create script element, set attributes
-			var ga = document.createElement("script");
-			ga.type = "text/javascript";
-			ga.async = true;
-			// determine if we're secure, use appropriate source for google's script
-			ga.src = ("https:" == document.location.protocol ? "https://ssl" : "http://www") + ".google-analytics.com/ga.js";
-			// get first script tag
-			var s = document.getElementsByTagName("script")[0];
-			// and insert our new script element before
-			s.parentNode.insertBefore(ga, s);
+			"socialNetwork": "facebook",
+			"socialAction": "like",
+			"socialTarget": "http://www.facebook.com"
 		}
-	)();
-};
+	);
 
-// create instance
-var googleAnalytics = new GoogleAnalytics();
+	Params:
+		action - string: "create" for initial instancing, "send" for additional requests, except custom dimensions and metrics, then "set"
+		category - string: category of action
+		options - object: additional options, docs at https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference
+*/
+(
+	function()
+	{
+		// create self instantiating GA object
+		window.GoogleAnalytics = function(autoSendPageView)
+		{
+			// create self reference for scope
+			var self = this;
+			// init empty container object for our tracking
+			//this.analytics;
+			// initialize
+			this.init(this.getMeta("ga-tracking-id"), this.getMeta("ga-domain"));
+			// do we want to auto send the pageview?
+			if(autoSendPageView)
+			{
+				// send pageview
+				this.track("send", "pageview");
+			}
+		};
+
+		GoogleAnalytics.prototype =
+		{
+			// insert script and setup google's object
+			init: function(trackingId, trackingDomain)
+			{
+				//window['GoogleAnalyticsObject'] = "ga";
+				this.analytics = this.analytics || function()
+				{
+					(this.analytics.q = this.analytics.q || []).push(arguments);
+				},
+				this.analytics.l = new Date();
+				gaScript = document.createElement("script"),
+				scriptBlock = document.getElementsByTagName("script")[0];
+				gaScript.async = 1;
+				gaScript.src = "//www.google-analytics.com/analytics.js";
+				scriptBlock.parentNode.insertBefore(gaScript, scriptBlock);
+				this.analytics("create", trackingId, trackingDomain);
+			},
+
+			// function to read data from meta tag
+			getMeta: function(attr)
+			{
+				// get all meta tags
+				var metaTags = document.getElementsByTagName("meta");
+				// store result
+				var result;
+				// loop through all tags
+				for(var i = 0; i < metaTags.length; i++)
+				{
+					// is this the one we seek?
+					if (metaTags[i].name.search(attr) != -1)
+					{
+						// yep, store result and exit loop
+						result = metaTags[i].content;
+						break;
+					}
+				}
+				// did we find it?
+				if(!result)
+				{
+					// no, throw an error
+					console.log("Meta tag " + attr + " not found.");
+					// and return
+					return;
+				}
+				// send back result
+				return result;
+			},
+
+			track: function(action, cat, options)
+			{
+				if(cat)
+				{
+					if(options)
+					{
+						this.analytics(action, cat, options);
+					}
+					else
+					{
+						this.analytics(action, cat);
+					}
+				}
+				else
+				{
+					if(options)
+					{
+						this.analytics(action, options);
+					}
+					else
+					{
+						throw("FATAL: Nothing to do");
+					}
+				}
+			}
+		};
+	}
+)();
