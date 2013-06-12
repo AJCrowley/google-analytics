@@ -29,10 +29,10 @@
 		options - object: additional options, docs at https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference
 */
 (
-	function()
+	function(context)
 	{
 		// create self instantiating GA object
-		window.GoogleAnalytics = function(autoSendPageView)
+		context.GoogleAnalytics = function(autoSendPageView)
 		{
 			// create self reference for scope
 			var self = this;
@@ -122,4 +122,4 @@
 			}
 		};
 	}
-)();
+)(window);
